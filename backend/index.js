@@ -1,7 +1,7 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-
+import express from "express"
+import mongoose from"mongoose"
+import dotenv from"dotenv"
+import userRoute from "./routes/userRoute.js";
 //congig dotenv
 dotenv.config();
 
@@ -20,3 +20,6 @@ const app = express();
 app.listen(3000, () => {
   console.log("server is running");
 });
+
+
+app.use('/api/user', userRoute);

@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import CircularProgress from "@mui/material/CircularProgress"; // Assurez-vous d'utiliser le chemin correct
+import CircularProgress from "@mui/material/CircularProgress"; 
 
 import LockIcon from "@mui/icons-material/Lock";
 import { useForm } from "react-hook-form";
@@ -19,7 +19,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const {
     register,
-    handleSubmit: handleFormSubmit, // Renommer la fonction handleSubmit
+    handleSubmit: handleFormSubmit, 
     formState: { errors },
   } = useForm({
     defaultValues: {

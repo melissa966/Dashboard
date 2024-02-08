@@ -7,19 +7,31 @@ import {
   Checkbox,
   Button,
   Typography,
+  Box,
 } from "@mui/material";
 
-import CircularProgress from "@mui/material/CircularProgress"; 
-
+import CircularProgress from "@mui/material/CircularProgress";
 import LockIcon from "@mui/icons-material/Lock";
+import Alert from "@mui/material/Alert";
+
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../store/slices/userSlice";
+
 export default function Signin() {
-  const [loading, setLoading] = useState(false);
+  const { loading, error: errorMessage } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
   const {
     register,
-    handleSubmit: handleFormSubmit, 
+    handleSubmit: handleFormSubmit,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -27,24 +39,28 @@ export default function Signin() {
       password: "",
     },
   });
-  const navigate = useNavigate();
+
   const onSubmit = async (formData) => {
+    if (!formData.email || !formData.password) {
+      return dispatch(signInFailure("Please fill all the fields"));
+    }
     try {
-      setLoading(true);
+      dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log(data);
-      setLoading(false);
+      if (data.success === false) {
+        dispatch(signInFailure(data.message));
+      }
       if (res.ok) {
+        dispatch(signInSuccess(data));
         navigate("/");
       }
     } catch (error) {
-      console.error("Error:", error);
-      setLoading(false);
+      dispatch(signInFailure(error.message));
     }
   };
 
@@ -109,6 +125,20 @@ export default function Signin() {
                   {loading ? <CircularProgress /> : "login"}
                 </Button>
               </Grid>
+              {errorMessage && (
+                <Alert
+                  variant="soft"
+                  color="danger"
+                  size="md"
+                  sx={{
+                    marginTop: "16px",
+                    backgroundColor: "rgba(255, 0, 0, 0.1)",
+                    color: "red",
+                  }}
+                >
+                  {errorMessage}
+                </Alert>
+              )}
               <Grid item style={{ width: "100%", textAlign: "left" }}></Grid>
             </Grid>
           </Paper>

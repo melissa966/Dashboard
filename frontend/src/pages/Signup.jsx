@@ -1,4 +1,3 @@
-import LockIcon from "@mui/icons-material/Lock";
 import {
   Avatar,
   Grid,
@@ -9,30 +8,49 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
 
+import CircularProgress from "@mui/material/CircularProgress"; // Assurez-vous d'utiliser le chemin correct
+
+import LockIcon from "@mui/icons-material/Lock";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 export default function Signup() {
+  const [loading, setLoading] = useState(false);
   const {
     register,
-    handleSubmit,
-    watch,
+    handleSubmit: handleFormSubmit, // Renommer la fonction handleSubmit
     formState: { errors },
   } = useForm({
     defaultValues: {
-      user: "",
-      email:"",
+      username: "",
+      email: "",
       password: "",
     },
   });
-
-  console.log(watch());
-
-  const onSubmit = (data) => {
-    console.log(data);
+const navigate=useNavigate();
+  const onSubmit = async (formData) => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      console.log(data);
+      setLoading(false);
+      if(res.ok){
+        navigate('/signin')
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleFormSubmit(onSubmit)}>
       <Grid
         container
         justifyContent="center"
@@ -40,7 +58,10 @@ export default function Signup() {
         style={{ minHeight: "100vh" }}
       >
         <Grid item>
-          <Paper elevation={10} style={{ padding: 30, width: 350, margin: "auto" }}>
+          <Paper
+            elevation={10}
+            style={{ padding: 30, width: 350, margin: "auto" }}
+          >
             <Grid container direction="column" alignItems="center" spacing={2}>
               <Grid item>
                 <Avatar style={{ backgroundColor: "#3739d7" }}>
@@ -52,14 +73,14 @@ export default function Signup() {
               </Grid>
               <Grid item style={{ width: "100%" }}>
                 <TextField
-                  {...register("user", { required: "This is required" })}
+                  {...register("username", { required: "This is required" })}
                   id="username"
                   label="Username*"
                   variant="standard"
                   placeholder="Enter your username"
                   fullWidth
-                  error={errors.user?.message}
-                  helperText={errors.user?.message}
+                  error={!!errors.username}
+                  helperText={errors.username?.message}
                 />
               </Grid>
 
@@ -67,11 +88,11 @@ export default function Signup() {
                 <TextField
                   {...register("email", { required: "This is required" })}
                   id="email"
-                  label="email*"
+                  label="Email*"
                   variant="standard"
                   placeholder="Enter your email"
                   fullWidth
-                  error={errors.email?.message}
+                  error={!!errors.email}
                   helperText={errors.email?.message}
                 />
               </Grid>
@@ -84,7 +105,7 @@ export default function Signup() {
                   placeholder="Enter your password"
                   type="password"
                   fullWidth
-                  error={errors.password?.message}
+                  error={!!errors.password}
                   helperText={errors.password?.message}
                 />
               </Grid>
@@ -92,12 +113,16 @@ export default function Signup() {
                 <FormControlLabel control={<Checkbox />} label="Remember me" />
               </Grid>
               <Grid item style={{ width: "100%" }}>
-                <Button variant="contained" type="submit" fullWidth>
-                  Register
+                <Button
+                  variant="contained"
+                  type="submit"
+                  fullWidth
+                  disabled={loading}
+                >
+                  {loading ? <CircularProgress /> : "Register"}
                 </Button>
               </Grid>
-              <Grid item style={{ width: "100%", textAlign: "left" }}>
-              </Grid>
+              <Grid item style={{ width: "100%", textAlign: "left" }}></Grid>
             </Grid>
           </Paper>
         </Grid>
